@@ -4,21 +4,20 @@ import { useEffect } from "react";
 import { AppDispatch, RootType, store } from "../core/providers/store";
 import { setUser } from "../modules/auth/model/auth.store";
 import { useDispatch, useSelector } from "react-redux";
-import { authApi, authLogic, signUser } from "../modules/auth";
+import { authApi, authLogic, signUser, updateUser } from "../modules/auth";
 
 export default function Home() {
   const dispatch = useDispatch<AppDispatch>();
   const authState = useSelector((state: RootType) => state.auth);
 
   useEffect(() => {
-    dispatch(
-signUser({
-        email: "newuser@example.com",
-        password: "12345678",
-        firstName: "John",
-        lastName: "Doe",
-        role: "user",
-      })    );
+    // Dispatch مباشرة في useEffect أو أي مكان للاختبار
+dispatch(updateUser({
+  uid: "wDJ5kyLt8SM4qkgrGF8gO5oq7wV2",
+  firstName: "Jane",
+  lastName: "Doe",
+  role: "admin"
+}));
   }, [dispatch]);
   console.log(authState);
 
