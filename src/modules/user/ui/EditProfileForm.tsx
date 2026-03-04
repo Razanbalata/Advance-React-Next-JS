@@ -1,157 +1,94 @@
-'use client';
+"use client";
 import React, { useState, useEffect } from "react";
-import { useSelector } from "react-redux";
-import { RootType } from "@/src/core/providers/store";
-import { Camera } from "lucide-react";
+import { Camera, X } from "lucide-react";
 
 interface EditProfileDialogProps {
-  open: boolean;
-  onClose: () => void;
-  onSave: (formData: FormData) => void;
+  open: boolean; onClose: () => void; onSave: (formData: FormData) => void; user?: any;
 }
 
-const EditProfileDialog: React.FC<EditProfileDialogProps> = ({
-  open,
-  onClose,
-  onSave,
-}) => {
-  const user = useSelector((state: RootType) => state.auth.user);
-
+const EditProfileDialog: React.FC<EditProfileDialogProps> = ({ open, onClose, onSave, user }) => {
   const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    gender: "",
-    address: "",
-    mobile: "",
-    img:'',
+    firstName: "", lastName: "", email: "", gender: "male", address: "", mobile: "", img: '',
   });
-
   const [imgPreview, setImgPreview] = useState<string>("");
 
-  // جلب بيانات المستخدم عند فتح المودال
   useEffect(() => {
     if (user && open) {
       setFormData({
-        firstName: user.firstName || "",
-        lastName: user.lastName || "",
-        email: user.email || "",
-        gender: user.gender || "male",
-        address: user.address || "",
-        mobile: user.mobile || "",
-        img: '',
+        firstName: user.firstName || "", lastName: user.lastName || "",
+        email: user.email || "", gender: user.gender || "male",
+        address: user.address || "", mobile: user.mobile || "", img: '',
       });
-      setImgPreview(user.img ||  "");
+      setImgPreview(user.img || "");
     }
   }, [user, open]);
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const target = e.target as HTMLInputElement;
-    if (target.type === "file" && target.files) {
-      const file = target.files[0];
-      console.log(file.name)
-      setFormData(prev => ({ ...prev, img: file.name }));
-      setImgPreview(URL.createObjectURL(file));
-    } else {
-      setFormData(prev => ({ ...prev, [target.name]: target.value }));
-    }
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const data = new FormData();
-    Object.entries(formData).forEach(([key, value]) => {
-      if (key === "img" && value) {
-        data.append(key, value);
-      } else {
-        data.append(key, value as string);
-      }
-    });
-  
-    onSave(data);
-    onClose();
-  };
 
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
-      <div className="relative w-full max-w-2xl bg-white rounded-2xl shadow-2xl p-8 max-h-[90vh] overflow-y-auto">
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 text-gray-500 hover:text-black text-lg"
-        >
-          ✕
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4">
+      <div className="relative w-full max-w-2xl bg-white dark:bg-gray-900 rounded-2xl shadow-2xl p-8 border dark:border-gray-800 max-h-[90vh] overflow-y-auto">
+        
+        <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-red-500 transition">
+          <X size={24} />
         </button>
 
         <h2 className="text-2xl font-bold text-center text-[#4678a7] mb-8">Edit Profile</h2>
 
-        <form className="flex flex-col gap-5" onSubmit={handleSubmit}>
-          {/* Profile Image */}
-          <div className="flex flex-col sm:flex-row items-center gap-4 relative">
-            <label className="w-full sm:w-1/3 text-sm font-medium">Profile Image</label>
-            <div className="w-full sm:w-2/3 flex items-center gap-4 relative">
-              <div className="relative">
-                {imgPreview ? (
-                  <img
-                    src={imgPreview}
-                    alt="Profile Preview"
-                    className="w-28 h-28 rounded-full object-cover border-2 border-teal-500"
-                  />
-                ) : (
-                  <div className="w-28 h-28 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 text-3xl">
-                    👤
-                  </div>
-                )}
-                <label className="absolute bottom-0 right-0 bg-white p-2 rounded-full border cursor-pointer hover:bg-gray-100">
-                  <Camera className="text-gray-600" />
-                  <input type="file" className="hidden" onChange={handleChange} name="img" />
-                </label>
-              </div>
+        <form className="flex flex-col gap-5" onSubmit={(e) => {
+          e.preventDefault();
+          const data = new FormData();
+          Object.entries(formData).forEach(([k, v]) => data.append(k, v));
+          onSave(data); onClose();
+        }}>
+          
+          {/* الصورة الشخصية */}
+          <div className="flex flex-col sm:flex-row items-center gap-4">
+            <label className="w-full sm:w-1/3 text-sm font-bold text-gray-700 dark:text-gray-300">Profile Image</label>
+            <div className="relative">
+              <img src={imgPreview || "/default-avatar.png"} className="w-24 h-24 rounded-full object-cover border-2 border-[#0ead82]" alt="Preview" />
+              <label className="absolute bottom-0 right-0 bg-white dark:bg-gray-800 p-1.5 rounded-full border border-gray-200 dark:border-gray-700 cursor-pointer">
+                <Camera size={16} className="text-gray-600 dark:text-gray-300" />
+                <input type="file" className="hidden" onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    setImgPreview(URL.createObjectURL(file));
+                    setFormData(p => ({ ...p, img: file as any }));
+                  }
+                }} />
+              </label>
             </div>
           </div>
 
-          {/* باقي الحقول */}
-          {["firstName","lastName","email","mobile","address"].map(field => (
+          {/* الحقول */}
+          {["firstName", "lastName", "email", "mobile", "address"].map(field => (
             <div key={field} className="flex flex-col sm:flex-row items-center gap-4">
-              <label className="w-full sm:w-1/3 text-sm font-medium">{field.charAt(0).toUpperCase() + field.slice(1)}</label>
+              <label className="w-full sm:w-1/3 text-sm font-bold text-gray-700 dark:text-gray-300 capitalize">{field}</label>
               <input
-                type={field === "email" ? "email" : "text"}
                 name={field}
-                className="input-style w-full sm:w-2/3"
-                value={formData[field as keyof typeof formData] as string}
-                onChange={handleChange}
+                className="w-full sm:w-2/3 p-2.5 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 dark:text-white outline-none focus:border-[#4678a7] transition"
+                value={(formData as any)[field]}
+                onChange={(e) => setFormData(p => ({ ...p, [e.target.name]: e.target.value }))}
               />
             </div>
           ))}
 
-          {/* Gender */}
+          {/* النوع */}
           <div className="flex flex-col sm:flex-row items-center gap-4">
-            <label className="w-full sm:w-1/3 text-sm font-medium">Gender</label>
-            <div className="w-full sm:w-2/3 flex gap-6">
-              {["male","female"].map(g => (
+            <label className="w-full sm:w-1/3 text-sm font-bold text-gray-700 dark:text-gray-300">Gender</label>
+            <div className="w-full sm:w-2/3 flex gap-6 dark:text-gray-200">
+              {["male", "female"].map(g => (
                 <label key={g} className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="radio"
-                    name="gender"
-                    value={g}
-                    checked={formData.gender === g}
-                    onChange={handleChange}
-                  />
-                  {g.charAt(0).toUpperCase() + g.slice(1)}
+                  <input type="radio" name="gender" value={g} checked={formData.gender === g} onChange={(e) => setFormData(p => ({ ...p, gender: e.target.value }))} className="accent-[#4678a7]" />
+                  {g}
                 </label>
               ))}
             </div>
           </div>
 
-          {/* Buttons */}
           <div className="flex justify-end gap-4 mt-6">
-            <button type="button" onClick={onClose} className="px-6 py-2 rounded-lg border border-gray-300 hover:bg-gray-100 transition">
-              Cancel
-            </button>
-            <button type="submit" className="px-6 py-2 rounded-lg bg-[#4678a7] text-white hover:bg-[#35648d] transition shadow-md">
-              Save
-            </button>
+            <button type="button" onClick={onClose} className="px-6 py-2 text-gray-500 hover:text-gray-700 dark:text-gray-400">Cancel</button>
+            <button type="submit" className="bg-[#4678a7] text-white px-8 py-2 rounded-lg font-bold shadow-md">Save</button>
           </div>
         </form>
       </div>

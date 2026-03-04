@@ -1,105 +1,77 @@
 @import "tailwindcss";
 
+/* 1. تعريف المتغيرات الأساسية */
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --card-bg: #ffffff;
+  --info-card-bg: #f5f7fa;
+  --text-main: #171717;
+  --text-muted: #555555;
+  --brand-primary: #0ead82;
+  --brand-secondary: #4678a7;
 }
 
+/* 2. تبديل القيم عند تفعيل كلاس .dark (بواسطة next-themes) */
+.dark {
+  --background: #0a0a0a;
+  --foreground: #ededed;
+  --card-bg: #1a1a1a;
+  --info-card-bg: #2d2d2d;
+  --text-main: #ededed;
+  --text-muted: #a1a1a1;
+  --brand-primary: #12c293; /* تفتيح اللون قليلاً للدارك */
+}
+
+/* 3. ربط المتغيرات بـ Tailwind v4 */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-card-bg: var(--card-bg);
+  --color-info-card: var(--info-card-bg);
+  --color-brand-green: var(--brand-primary);
+  --color-brand-blue: var(--brand-secondary);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+/* 4. تفعيل كلاس dark ليتم التعرف عليه في Tailwind v4 */
+@variant dark (&:where(.dark, .dark *));
 
+/* 5. تحديث الستايلات اليدوية لتصبح ديناميكية */
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
-}
-
-.input-style {
-  @apply rounded-lg border border-gray-300 px-4 py-2 text-sm outline-none transition focus:border-[#4678a7] focus:ring-2 focus:ring-[#4678a7]/30;
-}
-
-.label-style {
-  @apply text-sm font-medium text-gray-700;
-}
-
-.file-style {
-  @apply rounded-lg border border-gray-300 p-2 text-sm cursor-pointer;
-}
-
-.dashboard {
-  max-width: 900px;
-  margin: 40px auto;
-  display: flex;
-  justify-content: center;
+  transition: background 0.3s, color 0.3s;
 }
 
 .profile-section {
-  background-color: #fff;
+  background-color: var(--card-bg); /* استخدام المتغير بدلاً من #fff */
   border-radius: 10px;
   padding: 30px;
-  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.1);
   text-align: center;
-}
-
-.profile-image {
-  width: 130px;
-  height: 130px;
-  border-radius: 50%;
-  object-fit: cover;
-  margin-bottom: 20px;
-  border: 3px solid #0ead82;
-}
-
-.info-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
-  margin-top: 30px;
-  text-align: left;
+  color: var(--text-main);
 }
 
 .info-card {
-  background-color: #f5f7fa;
+  background-color: var(--info-card-bg); /* استخدام المتغير */
   padding: 20px;
   border-radius: 8px;
+  color: var(--text-main);
 }
 
 .info-card strong {
   display: block;
   margin-bottom: 8px;
-  color: #555;
+  color: var(--text-muted); /* استخدام المتغير */
 }
 
+/* تحديث الـ Inputs للدارك مود */
+.input-style {
+  @apply rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-sm outline-none transition focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/30 dark:text-white;
+}
+
+/* باقي الستايلات... */
 .edit-btn {
-  display: inline-block;
-  margin-top: 25px;
-  background-color: #0ead82;
-  color: white;
-  padding: 10px 25px;
-  border-radius: 6px;
-  text-decoration: none;
-  font-weight: 600;
-  cursor: pointer;
-  transition: 0.3s;
-}
-
-.edit-btn:hover {
-  background-color: #0c9271;
-}
-
-@media (max-width: 768px) {
-  .info-grid {
-    grid-template-columns: 1fr;
-  }
+  @apply inline-block mt-[25px] bg-brand-green text-white px-[25px] py-[10px] rounded-[6px] font-semibold cursor-pointer transition-all hover:opacity-90;
 }

@@ -3,9 +3,11 @@ import { AppDispatch } from "@/src/core/providers/store";
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import { signUser } from "../model/auth.logic";
+import { useRouter } from "next/navigation";
 
 const SignupForm: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
+  const router = useRouter()
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -46,6 +48,7 @@ const SignupForm: React.FC = () => {
       console.log("inside await")
       await dispatch(signUser(formData)).unwrap()
       alert("User Created Successfully!")
+      router.push('/user')
     }catch(error){
       console.log(error);
     }
