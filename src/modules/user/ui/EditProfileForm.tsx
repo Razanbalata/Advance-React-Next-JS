@@ -24,7 +24,7 @@ const EditProfileDialog: React.FC<EditProfileDialogProps> = ({
     gender: "",
     address: "",
     mobile: "",
-    img: null as File | null,
+    img:'',
   });
 
   const [imgPreview, setImgPreview] = useState<string>("");
@@ -39,7 +39,7 @@ const EditProfileDialog: React.FC<EditProfileDialogProps> = ({
         gender: user.gender || "male",
         address: user.address || "",
         mobile: user.mobile || "",
-        img: null,
+        img: '',
       });
       setImgPreview(user.img ||  "");
     }
@@ -49,7 +49,8 @@ const EditProfileDialog: React.FC<EditProfileDialogProps> = ({
     const target = e.target as HTMLInputElement;
     if (target.type === "file" && target.files) {
       const file = target.files[0];
-      setFormData(prev => ({ ...prev, img: file }));
+      console.log(file.name)
+      setFormData(prev => ({ ...prev, img: file.name }));
       setImgPreview(URL.createObjectURL(file));
     } else {
       setFormData(prev => ({ ...prev, [target.name]: target.value }));
@@ -66,6 +67,7 @@ const EditProfileDialog: React.FC<EditProfileDialogProps> = ({
         data.append(key, value as string);
       }
     });
+  
     onSave(data);
     onClose();
   };

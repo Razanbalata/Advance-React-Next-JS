@@ -3,7 +3,6 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootType } from '@/src/core/providers/store';
-import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import '@/src/app/globals.css'
 import EditProfileDialog from './EditProfileForm';
@@ -25,11 +24,32 @@ const ProfilePage: React.FC = () => {
       if (!user) return;
 
   const updates = Object.fromEntries(formData.entries());
+  console.log(updates)
      dispatch(updateUser({
       uid:user.uid,
       ...updates
      }))
   }
+
+  // هذا الكود يتأكد أن النص ليس فارغاً، وليس كلمة "null"، ويبدأ بمسار صحيح
+const getValidImageUrl = (url: any) => {
+  console.log(url)
+  if (typeof url !== 'string') return '/default-avatar.png';
+  const trimmedUrl = url.trim();
+  
+  if (!trimmedUrl || trimmedUrl === 'null' || trimmedUrl === 'undefined') {
+    return '/default-avatar.png';
+  }
+
+  // إذا كان الرابط لا يبدأ بـ / ولا بـ http، فهو رابط غير صالح لـ Next.js
+  if (!trimmedUrl.startsWith('/') && !trimmedUrl.startsWith('http')) {
+    return '/default-avatar.png';
+  }
+
+  return trimmedUrl;
+};
+
+const imageSrc = getValidImageUrl(user.img);
 
   return (
     <div className="main min-h-screen  p-6">
@@ -42,7 +62,7 @@ const ProfilePage: React.FC = () => {
           <hr className="border-gray-300 mb-4" />
 
           <Image
-            src={user.img || '/default-avatar.png'}
+            src={imageSrc}
             alt="User Image"
             className="profile-image w-32 h-32 mx-auto rounded-full object-cover mb-4"
            height={300}

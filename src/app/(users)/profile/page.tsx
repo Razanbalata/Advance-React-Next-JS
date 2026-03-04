@@ -1,12 +1,9 @@
 import ProfilePage from '@/src/modules/user/ui/ProfilePage';
-import HomePage from '@/src/shared/ui/home/HomePage';
 import React from 'react';
 
 function page() {
   return (
-    <div>
-     <HomePage/>
-    </div>
+    <ProfilePage />
   );
 }
 

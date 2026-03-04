@@ -9,7 +9,7 @@ function layout({
 }>) {
   return (
     <div className='flex '>
-      <Sidebar role='user'/>
+      <Sidebar/>
        <div className='w-full bg-gray-100'>
         <div className='w-[90%] m-auto'>
           <Header />
