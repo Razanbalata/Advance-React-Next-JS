@@ -3,7 +3,8 @@ import { authApi } from "../service/auth.api";
 import { setUser, setLoading, setError, logout } from "./auth.store";
 import { db } from "@/src/core/firebase/firebaseConfig";
 import { getDoc, doc, updateDoc } from "firebase/firestore";
-import { AuthUser } from "../types";
+import { AuthUser, LoginPayload, SignupPayload } from "../types";
+
 
 
 export const fetchUser = createAsyncThunk(
@@ -20,14 +21,22 @@ export const fetchUser = createAsyncThunk(
       firstName: data.firstName || "",
       lastName: data.lastName || "",
       role: data.role || "user",
-      createdAt: data.createdAt ? (data.createdAt instanceof Date ? data.createdAt.toISOString() : data.createdAt) : new Date().toISOString()
+      createdAt: data.createdAt ? (data.createdAt instanceof Date ? data.createdAt.toISOString() : data.createdAt) : new Date().toISOString(),
+      gender:data.gender || '',
+      address:data.address || '',
+      img:data.img || '',
+      mobile:data.mobile || ''
     } as AuthUser;
   }
 )
 
-export const authLogic = createAsyncThunk(
+export const authLogic = createAsyncThunk
+<
+any,
+LoginPayload
+>(
   "auth/loginUser",
-  async (credentials: { email: string; password: string }, { dispatch }) => {
+  async (credentials, { dispatch }) => {
     try {
       dispatch(setLoading(true));
       const user = await authApi.login(credentials);
@@ -43,9 +52,12 @@ export const authLogic = createAsyncThunk(
   },
 );
 
-export const signUser = createAsyncThunk(
+export const signUser = createAsyncThunk<
+any,
+SignupPayload
+>(
   "auth/signUser",
-  async (data: { email: string; password: string ,firstName:string, lastName:string, role:string}, { dispatch }) => {
+  async (data, { dispatch }) => {
     try {
       dispatch(setLoading(true));
       const user = await authApi.signup(data);
@@ -63,37 +75,21 @@ export const signUser = createAsyncThunk(
 
 export const updateUser = createAsyncThunk(
   "auth/updateUser",
-  async (data: Partial<AuthUser> & { uid: string }, { dispatch }) => {
-    try {
-      dispatch(setLoading(true));
+  async (data: Partial<AuthUser> & { uid: string }) => {
+    const { uid, ...updates } = data;
 
-      const { uid, ...updates } = data;
+    const docRef = doc(db, "users", uid);
+    await updateDoc(docRef, updates);
 
-      // 🔹 تحديث بيانات المستخدم في Firestore
-      const docRef = doc(db, "users", uid);
-      await updateDoc(docRef, updates);
+    const docSnap = await getDoc(docRef);
+    if (!docSnap.exists()) throw new Error("User not found");
 
-      // 🔹 جلب البيانات المحدثة للتأكد
-      const docSnap = await getDoc(docRef);
-      if (!docSnap.exists()) throw new Error("User not found after update");
+    const rawData = docSnap.data();
 
-      const updatedUser = {
-        ...docSnap.data(),
-        createdAt: docSnap.data()?.createdAt instanceof Date
-          ? docSnap.data()?.createdAt.toISOString()
-          : docSnap.data()?.createdAt
-      } as AuthUser;
-
-      // 🔹 تحديث Redux state
-      dispatch(setUser(updatedUser));
-
-      return updatedUser;
-    } catch (error: any) {
-      dispatch(setError(error.message));
-      throw error;
-    } finally {
-      dispatch(setLoading(false));
-    }
+    return {
+      ...rawData,
+      createdAt: rawData?.createdAt?.toDate?.().toISOString() || null,
+    } as AuthUser;
   }
 );
 

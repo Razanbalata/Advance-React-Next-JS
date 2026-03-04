@@ -1,4 +1,4 @@
-export { default as UserCard } from './ui/UserCard';
+export { default as UserCard } from './ui/UserTable';
 export { default as EditProfileForm } from './ui/EditProfileForm';
 export { default as userStore } from './model/user.store';
 export * from './model/user.logic';

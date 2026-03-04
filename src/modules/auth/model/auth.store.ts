@@ -1,5 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { AuthState, AuthUser } from '../types';
+import { updateUser } from './auth.logic';
 
 const initialState: AuthState = {
    user: null,
@@ -24,6 +25,21 @@ const authSlice = createSlice({
     logout(state) {
       state.user = null;
     },
+  },
+  extraReducers(builder) {
+    builder
+    .addCase(updateUser.pending,(state)=>{
+       state.loading = true;
+        state.error = null;
+      })
+      .addCase(updateUser.fulfilled, (state, action) => {
+        state.loading = false;
+        state.user = action.payload;
+      })
+      .addCase(updateUser.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message || "Update failed";
+      });
   },
 });
 

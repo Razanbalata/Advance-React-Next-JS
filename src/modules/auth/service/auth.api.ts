@@ -15,35 +15,25 @@ export const authApi = {
     return { uid: userCredential.user.uid, email: userCredential.user.email };
   },
 
-  signup: async ({
-  email,
-  password,
-  firstName,
-  lastName,
-  role = "user"
-}: {
-  email: string;
-  password: string;
-  firstName: string;
-  lastName: string;
-  role?: string;
-}) => {
+  signup: async (data: any) => {
+    const { password, confrimPassword, ...rest } = data;
     const userCredential = await createUserWithEmailAndPassword(
       auth,
-      email,
+      data.email,
       password,
     );
+    const user = userCredential.user;
+
+    const dataToSave = {
+      uid: user.uid,
+      ...rest,
+      img: null,
+      createdAt: new Date().toISOString(),
+    };
 
     // 🔥 إضافة user في Firestore
-    await setDoc(doc(db, "users", userCredential.user.uid), {
-      uid: userCredential.user.uid,
-      email: userCredential.user.email,
-      firstName,
-      lastName,
-      role,
-      createdAt: new Date().toISOString(),
-    });
-    return { uid: userCredential.user.uid, email: userCredential.user.email };
+    await setDoc(doc(db, "users", user.uid), dataToSave);
+    return { uid: user.uid, email: user.email };
   },
 
   logout: async () => {
