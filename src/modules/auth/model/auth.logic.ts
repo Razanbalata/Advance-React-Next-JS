@@ -92,6 +92,21 @@ export const updateUser = createAsyncThunk(
     } as AuthUser;
   }
 );
+export const changePassword = createAsyncThunk(
+  'auth/changePassword',
+  async (newPassword: string, { dispatch }) => {
+    try {
+      dispatch(setLoading(true));
+      await authApi.changePassword(newPassword);
+      return true;
+    } catch (error: any) {
+      dispatch(setError(error.message));
+      throw error;
+    } finally {
+      dispatch(setLoading(false));
+    }
+  }
+)
 
 export const logoutUser = createAsyncThunk(
   "auth/logoutUser",

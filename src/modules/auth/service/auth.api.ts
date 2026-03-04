@@ -5,6 +5,8 @@ import {
   signOut,
 } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
+import { updatePassword as firebaseUpdatePassword } from "firebase/auth";
+
 export const authApi = {
   login: async ({ email, password }: { email: string; password: string }) => {
     const userCredential = await signInWithEmailAndPassword(
@@ -35,7 +37,11 @@ export const authApi = {
     await setDoc(doc(db, "users", user.uid), dataToSave);
     return { uid: user.uid, email: user.email };
   },
-
+  changePassword:async(newPass:string)=>{
+    if (!auth.currentUser) throw new Error("User not logged in");
+    await firebaseUpdatePassword(auth.currentUser,newPass)
+    return true
+  },
   logout: async () => {
     await signOut(auth);
   },

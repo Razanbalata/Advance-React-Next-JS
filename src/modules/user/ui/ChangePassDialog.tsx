@@ -1,5 +1,8 @@
 "use client";
+import { AppDispatch } from "@/src/core/providers/store";
 import React, { useState } from "react";
+import { useDispatch } from "react-redux";
+import { changePassword } from "../../auth";
 
 interface ChangePasswordDialogProps {
   open: boolean;
@@ -18,7 +21,7 @@ const ChangePasswordDialog: React.FC<ChangePasswordDialogProps> = ({
 
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-
+  const dispatch = useDispatch<AppDispatch>();
   if (!open) return null;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -41,11 +44,9 @@ const ChangePasswordDialog: React.FC<ChangePasswordDialogProps> = ({
       return;
     }
 
-    // Simulate API call
-    setTimeout(() => {
-      setSuccess("Password changed successfully!");
-      setFormData({ currentPassword: "", newPassword: "", confirmPassword: "" });
-    }, 1000);
+    dispatch(changePassword(formData.newPassword));
+    setSuccess("Password changed successfully!");
+    onClose()
   };
 
   return (
@@ -63,8 +64,16 @@ const ChangePasswordDialog: React.FC<ChangePasswordDialogProps> = ({
           Change Password
         </h2>
 
-        {error && <div className="bg-red-100 text-red-700 p-2 mb-4 rounded">{error}</div>}
-        {success && <div className="bg-green-100 text-green-700 p-2 mb-4 rounded">{success}</div>}
+        {error && (
+          <div className="bg-red-100 text-red-700 p-2 mb-4 rounded">
+            {error}
+          </div>
+        )}
+        {success && (
+          <div className="bg-green-100 text-green-700 p-2 mb-4 rounded">
+            {success}
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div>
@@ -92,7 +101,9 @@ const ChangePasswordDialog: React.FC<ChangePasswordDialogProps> = ({
           </div>
 
           <div>
-            <label className="block font-semibold mb-1">Confirm New Password</label>
+            <label className="block font-semibold mb-1">
+              Confirm New Password
+            </label>
             <input
               type="password"
               name="confirmPassword"
