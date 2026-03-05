@@ -10,6 +10,7 @@ const HomePage = () => {
   const user = useSelector((state: RootType) => state.auth.user);
   const role = user?.role || 'user';
   const router = useRouter();
+  console.log(user)
 
   return (
     <div className="p-10 min-h-screen bg-background text-foreground transition-colors duration-300 flex flex-col items-center">

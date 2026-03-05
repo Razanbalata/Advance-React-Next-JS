@@ -20,7 +20,7 @@ export const authApi = {
   },
 
   signup: async (data: any) => {
-    const { password, confrimPassword, ...rest } = data;
+    const { password, confirmPassword, ...rest } = data;
     const userCredential = await createUserWithEmailAndPassword(
       auth,
       data.email,
@@ -45,7 +45,7 @@ export const authApi = {
     return true
   },
   adminCreateUserApi : async (data: any) => {
-  const tempApp = initializeApp(firebaseConfig, 'TemporaryApp');
+  const tempApp = initializeApp(firebaseConfig, `temp-${Date.now()}`);
   const tempAuth = getAuth(tempApp);
 
   try {

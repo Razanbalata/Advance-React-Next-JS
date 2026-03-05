@@ -2,41 +2,43 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 import { authApi } from "../service/auth.api";
 import { setUser, setLoading, setError, logout } from "./auth.store";
 import { db } from "@/src/core/firebase/firebaseConfig";
-import { getDoc, doc, updateDoc } from "firebase/firestore";
+import { getDoc, doc, updateDoc, deleteDoc } from "firebase/firestore";
 import { AuthUser, LoginPayload, SignupPayload } from "../types";
-import { initializeApp } from "firebase/app";
-import { createUserWithEmailAndPassword, getAuth } from "firebase/auth";
-
-
 
 export const fetchUser = createAsyncThunk(
   "auth/fetchUserData",
-  async (uid:string)=>{
-   const docRef = doc(db,"users",uid)
-   const docSnap = await getDoc(docRef)
-   if(!docSnap.exists())throw new Error("User not found in Firestore");
-   const data = docSnap.data()
+  async (uid: string) => {
+    console.log("Fetching user:", uid);
 
-       return {
+    const docRef = doc(db, "users", uid);
+    const docSnap = await getDoc(docRef);
+
+    console.log("Doc exists:", docSnap.exists());
+
+    if (!docSnap.exists()) throw new Error("User not found in Firestore");
+
+    const data = docSnap.data();
+    console.log("Firestore data:", data);
+
+    return {
       uid: data.uid,
       email: data.email,
       firstName: data.firstName || "",
       lastName: data.lastName || "",
       role: data.role || "user",
-      createdAt: data.createdAt ? (data.createdAt instanceof Date ? data.createdAt.toISOString() : data.createdAt) : new Date().toISOString(),
-      gender:data.gender || '',
-      address:data.address || '',
-      img:data.img || '',
-      mobile:data.mobile || ''
+      createdAt:
+        data.createdAt?.toDate?.().toISOString() ??
+        data.createdAt ??
+        new Date().toISOString(),
+      gender: data.gender || "",
+      address: data.address || "",
+      img: data.img || "",
+      mobile: data.mobile || "",
     } as AuthUser;
   }
-)
+);
 
-export const authLogic = createAsyncThunk
-<
-any,
-LoginPayload
->(
+export const authLogic = createAsyncThunk<any, LoginPayload>(
   "auth/loginUser",
   async (credentials, { dispatch }) => {
     try {
@@ -54,10 +56,7 @@ LoginPayload
   },
 );
 
-export const signUser = createAsyncThunk<
-any,
-SignupPayload
->(
+export const signUser = createAsyncThunk<any, SignupPayload>(
   "auth/signUser",
   async (data, { dispatch }) => {
     try {
@@ -92,10 +91,10 @@ export const updateUser = createAsyncThunk(
       ...rawData,
       createdAt: rawData?.createdAt?.toDate?.().toISOString() || null,
     } as AuthUser;
-  }
+  },
 );
 export const changePassword = createAsyncThunk(
-  'auth/changePassword',
+  "auth/changePassword",
   async (newPassword: string, { dispatch }) => {
     try {
       dispatch(setLoading(true));
@@ -107,31 +106,31 @@ export const changePassword = createAsyncThunk(
     } finally {
       dispatch(setLoading(false));
     }
-  }
-)
+  },
+);
 export const deleteUser = createAsyncThunk(
-  'auth/deleteUserFromStore',
-  async (uid:string)=>{
-    const docRef = doc(db,'users',uid)
-    await deleteUser(docRef.id)
-      return uid
-   }
-)
+  "auth/deleteUserFromStore",
+  async (uid: string) => {
+    const docRef = doc(db, "users", uid);
+    await deleteDoc(docRef);
+    return uid;
+  },
+);
 export const addUserByAdmin = createAsyncThunk(
   "auth/addUserByAdmin",
-  async(data:any,{dispatch,rejectWithValue})=>{
-    try{
+  async (data: any, { dispatch, rejectWithValue }) => {
+    try {
       dispatch(setLoading(true));
       const newUserDoc = await authApi.adminCreateUserApi(data);
       return newUserDoc;
-    }catch (error: any) {
+    } catch (error: any) {
       dispatch(setError(error.message));
       return rejectWithValue(error.message);
     } finally {
       dispatch(setLoading(false));
     }
-  }
-)
+  },
+);
 export const logoutUser = createAsyncThunk(
   "auth/logoutUser",
   async (_, { dispatch }) => {

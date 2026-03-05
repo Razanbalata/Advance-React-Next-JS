@@ -10,40 +10,40 @@ type Props = {
   children: ReactNode;
 };
 
-function AuthInitializer({ children }: Props) {
-  const dispatch = useDispatch<AppDispatch>();
+// function AuthInitializer({ children }: Props) {
+//   const dispatch = useDispatch<AppDispatch>();
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-      if (firebaseUser) {
-        dispatch(
-          setUser({
-            uid: firebaseUser.uid,
-            email: firebaseUser.email!,
-            firstName: firebaseUser.displayName?.split(" ")[0] || "User",
-            role: "user",
-            // إضافة قيم افتراضية للحقول الناقصة
-            address: "",
-            gender: "",
-            mobile: "",
-            img: "",
-          }),
-        );
-      } else {
-        dispatch(clearUser());
-      }
-    });
+//   useEffect(() => {
+//     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+//       if (firebaseUser) {
+//         dispatch(
+//           setUser({
+//             uid: firebaseUser.uid,
+//             email: firebaseUser.email!,
+//             firstName: firebaseUser.displayName?.split(" ")[0] || "User",
+//             role: "user",
+//             // إضافة قيم افتراضية للحقول الناقصة
+//             address: "",
+//             gender: "",
+//             mobile: "",
+//             img: "",
+//           }),
+//         );
+//       } else {
+//         dispatch(clearUser());
+//       }
+//     });
 
-    return () => unsubscribe();
-  }, [dispatch]);
+//     return () => unsubscribe();
+//   }, [dispatch]);
 
-  return <>{children}</>;
-}
+//   return <>{children}</>;
+// }
 
 function ReduxProvider({ children }: Props) {
   return (
     <Provider store={store}>
-      <AuthInitializer>{children}</AuthInitializer>
+      {children}
     </Provider>
   );
 }

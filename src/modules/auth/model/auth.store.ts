@@ -1,13 +1,12 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { AuthState, AuthUser } from '../types';
-import { deleteUser, updateUser } from './auth.logic';
+import { deleteUser, updateUser, fetchUser } from './auth.logic'; // ⭐ أضف fetchUser
 
 const initialState: AuthState = {
-   user: null,
+  user: null,
   loading: false,
   error: null,
-
-}
+};
 
 const authSlice = createSlice({
   name: 'auth',
@@ -25,13 +24,29 @@ const authSlice = createSlice({
     logout(state) {
       state.user = null;
     },
-    clearUser(state){
-     state.user = null;
-     state.loading = false
-    }
+    clearUser(state) {
+      state.user = null;
+      state.loading = false;
+    },
   },
+
   extraReducers: (builder) => {
-    // 1. منطق تحديث المستخدم
+
+    // ⭐ fetch user من Firestore
+    builder
+      .addCase(fetchUser.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(fetchUser.fulfilled, (state, action) => {
+        state.loading = false;
+        state.user = action.payload; // ⭐ هنا يتم حفظ المستخدم
+      })
+      .addCase(fetchUser.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message || "Fetch user failed";
+      });
+
+    // update user
     builder
       .addCase(updateUser.pending, (state) => {
         state.loading = true;
@@ -46,7 +61,7 @@ const authSlice = createSlice({
         state.error = action.error.message || "Update failed";
       });
 
-    // 2. منطق حذف المستخدم (يتم دمجهم هنا باستخدام نفس الـ builder)
+    // delete user
     builder
       .addCase(deleteUser.pending, (state) => {
         state.loading = true;
@@ -54,7 +69,6 @@ const authSlice = createSlice({
       })
       .addCase(deleteUser.fulfilled, (state, action) => {
         state.loading = false;
-        // لو المستخدم اللي انحذف هو نفسه اللي عامل Login حالياً
         if (state.user?.uid === action.payload) {
           state.user = null;
         }
@@ -66,6 +80,5 @@ const authSlice = createSlice({
   },
 });
 
-export const {setLoading,setUser,setError,logout,clearUser} = authSlice.actions
-
+export const { setLoading, setUser, setError, logout, clearUser } = authSlice.actions;
 export default authSlice.reducer;
