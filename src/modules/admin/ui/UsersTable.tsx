@@ -5,7 +5,7 @@ import { AppDispatch, RootType } from "@/src/core/providers/store";
 import { useRouter } from "next/navigation";
 import { Delete, Edit } from "lucide-react";
 import { EditProfileForm } from "../../user";
-import { deleteUser } from "../../auth";
+import { deleteUser, SignupForm } from "../../auth";
 import { db } from "@/src/core/firebase/firebaseConfig"; // تأكدي من استيراد db
 import { collection, getDocs } from "firebase/firestore";
 import { handleProfileUpdate } from "@/src/shared/config/auth.logic";
@@ -31,6 +31,7 @@ const AdminDashboard: React.FC = () => {
   const [open, setOpen] = useState(false);
   const dispatch = useDispatch<AppDispatch>();
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [showModal, setShowModal] = useState(false);
   // تحقق إذا كان الادمن
   useEffect(() => {
     if (!currentUser || currentUser.role !== "admin") {
@@ -77,10 +78,40 @@ const AdminDashboard: React.FC = () => {
           <h1 className="text-2xl font-bold">User List</h1>
           <button
             className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-            onClick={() => router.push("/admin/add_user")}
+            onClick={() => setShowModal(true)}
           >
             Add New User
           </button>
+          {showModal && (
+  <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+    {/* 1. الخلفية المعتمة (Overlay) */}
+    <div 
+      className="absolute inset-0 bg-black/50 backdrop-blur-sm" 
+      onClick={() => setShowModal(false)} 
+    ></div>
+
+    {/* 2. حاوية المودال (Content) */}
+    <div className="relative bg-white dark:bg-gray-900 w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-2xl shadow-2xl z-10 animate-in fade-in zoom-in duration-200">
+      
+      {/* زر إغلاق سريع (X) في الزاوية */}
+      <button 
+        onClick={() => setShowModal(false)}
+        className="absolute top-4 right-4 text-gray-500 hover:text-red-500 transition-colors z-20"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+
+      {/* استدعاء الفورم */}
+      <SignupForm
+        isAdminMode={true} 
+        onSuccess={() => {
+          fetchUsers(); 
+          setShowModal(false); 
+        }} 
+      />
+    </div>
+  </div>
+)}
         </div>
 
         <div className="overflow-x-auto">

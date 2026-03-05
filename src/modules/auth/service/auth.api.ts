@@ -1,11 +1,13 @@
-import { auth, db } from "@/src/core/firebase/firebaseConfig";
+import { auth, db, firebaseConfig } from "@/src/core/firebase/firebaseConfig";
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   signOut,
+  getAuth,
 } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
 import { updatePassword as firebaseUpdatePassword } from "firebase/auth";
+import { deleteApp, initializeApp } from "firebase/app";
 
 export const authApi = {
   login: async ({ email, password }: { email: string; password: string }) => {
@@ -42,6 +44,46 @@ export const authApi = {
     await firebaseUpdatePassword(auth.currentUser,newPass)
     return true
   },
+  adminCreateUserApi : async (data: any) => {
+  const tempApp = initializeApp(firebaseConfig, 'TemporaryApp');
+  const tempAuth = getAuth(tempApp);
+
+  try {
+    // إنشاء الحساب في Authentication
+    const userCredential = await createUserWithEmailAndPassword(
+      tempAuth,
+      data.email,
+      data.password
+    );
+    const newUser = userCredential.user;
+
+    // تخزين البيانات في Firestore
+    const userDoc = {
+      uid: newUser.uid,
+      firstName: data.firstName,
+      lastName: data.lastName,
+      username: data.username,
+      email: data.email,
+      role: data.role || "user",
+      gender: data.gender || "",
+      address: data.address || "",
+      mobile: data.mobile || "",
+      createdAt: new Date().toISOString(),
+    };
+
+    await setDoc(doc(db, "users", newUser.uid), userDoc);
+
+    // تسجيل الخروج من التطبيق المؤقت وحذفه
+    await signOut(tempAuth);
+    await deleteApp(tempApp);
+
+    return userDoc;
+  } catch (error) {
+    await deleteApp(tempApp);
+    throw error;
+  }
+}
+,
   logout: async () => {
     await signOut(auth);
   },

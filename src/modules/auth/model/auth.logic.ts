@@ -4,6 +4,8 @@ import { setUser, setLoading, setError, logout } from "./auth.store";
 import { db } from "@/src/core/firebase/firebaseConfig";
 import { getDoc, doc, updateDoc } from "firebase/firestore";
 import { AuthUser, LoginPayload, SignupPayload } from "../types";
+import { initializeApp } from "firebase/app";
+import { createUserWithEmailAndPassword, getAuth } from "firebase/auth";
 
 
 
@@ -114,6 +116,21 @@ export const deleteUser = createAsyncThunk(
     await deleteUser(docRef.id)
       return uid
    }
+)
+export const addUserByAdmin = createAsyncThunk(
+  "auth/addUserByAdmin",
+  async(data:any,{dispatch,rejectWithValue})=>{
+    try{
+      dispatch(setLoading(true));
+      const newUserDoc = await authApi.adminCreateUserApi(data);
+      return newUserDoc;
+    }catch (error: any) {
+      dispatch(setError(error.message));
+      return rejectWithValue(error.message);
+    } finally {
+      dispatch(setLoading(false));
+    }
+  }
 )
 export const logoutUser = createAsyncThunk(
   "auth/logoutUser",
