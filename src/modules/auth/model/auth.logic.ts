@@ -107,7 +107,14 @@ export const changePassword = createAsyncThunk(
     }
   }
 )
-
+export const deleteUser = createAsyncThunk(
+  'auth/deleteUserFromStore',
+  async (uid:string)=>{
+    const docRef = doc(db,'users',uid)
+    await deleteUser(docRef.id)
+      return uid
+   }
+)
 export const logoutUser = createAsyncThunk(
   "auth/logoutUser",
   async (_, { dispatch }) => {

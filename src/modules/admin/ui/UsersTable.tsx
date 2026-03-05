@@ -1,10 +1,13 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
-import { RootType } from "@/src/core/providers/store";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootType } from "@/src/core/providers/store";
 import { useRouter } from "next/navigation";
 import { Delete, Edit } from "lucide-react";
 import { EditProfileForm } from "../../user";
+import { deleteUser } from "../../auth";
+import { db } from "@/src/core/firebase/firebaseConfig";  // تأكدي من استيراد db
+import { collection, getDocs } from "firebase/firestore";
 
 // نوع المستخدم
 interface User {
@@ -25,6 +28,7 @@ const AdminDashboard: React.FC = () => {
   const currentUser = useSelector((state: RootType) => state.auth.user);
   const [users, setUsers] = useState<User[]>([]);
   const [open,setOpen] = useState(false)
+  const dispatch = useDispatch<AppDispatch>()
 
   // تحقق إذا كان الادمن
   useEffect(() => {
@@ -37,41 +41,25 @@ const AdminDashboard: React.FC = () => {
   useEffect(() => {
     // هنا بدل API call
     const fetchUsers = async () => {
-      // مثال بيانات ثابتة، استبدلها بAPI حقيقي أو Firebase
-      const dummyUsers: User[] = [
-        {
-          id: "1",
-          firstName: "Razan",
-          lastName: "Balata",
-          username: "roz",
-          email: "razan1@test.com",
-          gender: "female",
-          address: "Gaza",
-          mobile: "0595485130",
-          altmobile: "123123",
-          role: "user",
-        },
-        {
-          id: "2",
-          firstName: "Ali",
-          lastName: "Khalil",
-          username: "ali123",
-          email: "ali@test.com",
-          gender: "male",
-          address: "Nablus",
-          mobile: "0591234567",
-          altmobile: "",
-          role: "user",
-        },
-      ];
-      setUsers(dummyUsers);
+      try{
+        const querySnapShot = await getDocs(collection(db,'users'))
+        const userData = querySnapShot.docs.map(doc=>({
+          id:doc.id,
+          ...doc.data
+        })) as User[]
+        setUsers(userData)
+      }catch (error){
+        console.error('Error fetching users',error)
+      }
+      
     };
 
     fetchUsers();
   }, []);
-
+console.log(users)
   const handleDelete = (id: string) => {
     if (confirm("Are you sure you want to delete this user?")) {
+      dispatch(deleteUser(id))
       setUsers(users.filter((u) => u.id !== id));
     }
   };

@@ -1,13 +1,13 @@
 export interface AuthUser {
   uid: string;
-  email: string;
+  email: string
   firstName?: string;
   lastName?: string;
   role?: string;
-  address:string;
-  gender:string;
-  mobile:string
-  img: string ;
+  address?:string;
+  gender?:string;
+  mobile?:string
+  img?: string ;
   createdAt?: string;
 }
 
@@ -21,7 +21,7 @@ export interface SignupPayload {
   firstName: string;
   lastName: string;
   username: string;
-  email: string;
+  email: string ;
   gender: string;
   address: string;
   mobile: string;
