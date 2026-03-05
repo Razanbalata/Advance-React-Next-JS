@@ -6,8 +6,9 @@ import { useRouter } from "next/navigation";
 import { Delete, Edit } from "lucide-react";
 import { EditProfileForm } from "../../user";
 import { deleteUser } from "../../auth";
-import { db } from "@/src/core/firebase/firebaseConfig";  // تأكدي من استيراد db
+import { db } from "@/src/core/firebase/firebaseConfig"; // تأكدي من استيراد db
 import { collection, getDocs } from "firebase/firestore";
+import { handleProfileUpdate } from "@/src/shared/config/auth.logic";
 
 // نوع المستخدم
 interface User {
@@ -27,9 +28,9 @@ const AdminDashboard: React.FC = () => {
   const router = useRouter();
   const currentUser = useSelector((state: RootType) => state.auth.user);
   const [users, setUsers] = useState<User[]>([]);
-  const [open,setOpen] = useState(false)
-  const dispatch = useDispatch<AppDispatch>()
-
+  const [open, setOpen] = useState(false);
+  const dispatch = useDispatch<AppDispatch>();
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
   // تحقق إذا كان الادمن
   useEffect(() => {
     if (!currentUser || currentUser.role !== "admin") {
@@ -37,32 +38,36 @@ const AdminDashboard: React.FC = () => {
     }
   }, [currentUser, router]);
 
+  const fetchUsers = async () => {
+    try {
+      const querySnapShot = await getDocs(collection(db, "users"));
+      const userData = querySnapShot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      })) as User[];
+      setUsers(userData);
+    } catch (error) {
+      console.error("Error fetching users", error);
+    }
+  };
+
   // جلب بيانات المستخدمين (محاكاة fetch)
   useEffect(() => {
-    // هنا بدل API call
-    const fetchUsers = async () => {
-      try{
-        const querySnapShot = await getDocs(collection(db,'users'))
-        const userData = querySnapShot.docs.map(doc=>({
-          id:doc.id,
-          ...doc.data
-        })) as User[]
-        setUsers(userData)
-      }catch (error){
-        console.error('Error fetching users',error)
-      }
-      
-    };
-
     fetchUsers();
   }, []);
-console.log(users)
+  console.log(users);
   const handleDelete = (id: string) => {
     if (confirm("Are you sure you want to delete this user?")) {
-      dispatch(deleteUser(id))
+      dispatch(deleteUser(id));
       setUsers(users.filter((u) => u.id !== id));
     }
   };
+
+  async function handleSave(formData: FormData) {
+    if (selectedUser) {
+      await handleProfileUpdate(dispatch, selectedUser.id, formData);
+    }
+  }
 
   return (
     <div className="flex min-h-screen w-[88%] m-auto">
@@ -111,7 +116,7 @@ console.log(users)
                   <td className="p-3 flex flex-1 gap-0.5">
                     <button
                       className=" text-green-400 px-2 py-1 rounded hover:text-green-600 cursor-pointer transition-colors duration-300"
-                      onClick={() => router.push(`/admin/edit_user/${user.id}`)}
+                      onClick={() => { setSelectedUser(user); setOpen(true); }}
                     >
                       <Edit />
                     </button>
@@ -122,9 +127,13 @@ console.log(users)
                       <Delete />
                     </button>
                   </td>
-                   {/* <EditProfileForm open={open} onClose={()=>setOpen(false)} onSave={user} user={user}/> */}
+                  <EditProfileForm
+                    open={open}
+                    onClose={() => setOpen(false)}
+                    onSave={handleSave}
+                    user={user}
+                  />
                 </tr>
-                
               ))}
               {users.length === 0 && (
                 <tr>
@@ -135,7 +144,6 @@ console.log(users)
               )}
             </tbody>
           </table>
-         
         </div>
       </div>
     </div>

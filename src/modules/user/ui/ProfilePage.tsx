@@ -5,6 +5,7 @@ import { AppDispatch, RootType } from '@/src/core/providers/store';
 import Image from 'next/image';
 import EditProfileDialog from './EditProfileForm';
 import { updateUser } from '../../auth';
+import { handleProfileUpdate } from '@/src/shared/config/auth.logic';
 
 const ProfilePage: React.FC = () => {
   const user = useSelector((state: RootType) => state.auth.user);
@@ -14,8 +15,9 @@ const ProfilePage: React.FC = () => {
   if (!user) return <div className="p-10 text-center">Please login...</div>;
 
   const handleSave = (formData: FormData) => {
-    const updates = Object.fromEntries(formData.entries());
-    dispatch(updateUser({ uid: user.uid, ...updates }));
+    if(user) {
+      handleProfileUpdate(dispatch, user.uid, formData);
+    }
   };
 
   const imageSrc = user.img && user.img !== 'null' ? user.img : '/default-avatar.png';
